@@ -1,14 +1,66 @@
 local glutil = {}
 
+--[[
+	Actual utility stuff
+]]
+
 -- Gets all hooks for an event that originate from a specified source
 function glutil.GetHooksBySource(event, source)
-	local match_hooks = {}
+	local matching_hooks = {}
 	for k,v in pairs(hook.GetTable()[event]) do
 		if string.find(string.lower(debug.getinfo(v)["source"]), string.lower(source), 1, true) then
-			match_hooks[k] = v
+			matching_hooks[k] = v
 		end
 	end
-	return match_hooks
+
+	return matching_hooks
+end
+
+-- Compiles a function as a string and returns it
+function glutil.CompileStringFunction(code)
+	return CompileString("return "..code, "CompileStringFunction function")()	
+end
+-- Opposite of lerp, speed increases as it closes on its target value
+function glutil.AntiLerp(fract, val, target)
+	return math.Clamp(val*(1+fract), 0, target)
+end
+
+-- Given an origin and a size, it returns a value that would center an object on the origin
+function glutil.GetCenterPos(origin, size)
+	return origin/2 - size/2
+end
+
+-- Gets a player's name, minus all of their (community) tags
+function glutil.GetTagLessName(player)
+	local name = player:Name()
+	name = string.gsub(name, "%[.+%]%s", "")
+	name = string.gsub(name, "%s%[.+%]", "")
+	name = string.gsub(name, "%(.+%)%s ", "")
+	name = string.gsub(name, "%s%(.+%)", "")
+
+	return name
+end
+
+--[[
+		Everything else
+		Cool stuff, etc.
+]]
+
+-- Given a direct link to a version tracker, it checks if the provided version matches with the one in the tracker
+function glutil.CheckVersion(tracker, version)
+	MsgC(Color(236, 240, 241), "-> Version: "..version.."\n")
+	MsgC(Color(236, 240, 241), "-> Checking if current version matches newest version...\n")
+	http.Fetch(tracker, function(body)
+		if body == version then
+			MsgC(Color(46, 204, 113), "-> The current version is up to date!\n")
+		else
+			MsgC(Color(231, 76, 60), "! The current version is out of date!\n")
+			MsgC(Color(236, 240, 241), "-> Current version: "..version.."\n")
+			MsgC(Color(236, 240, 241), "-> Newest version: "..body.."\n")
+		end
+	end, function()
+		MsgC(Color(231, 76, 60), "! Failed to fetch version tracker!\n")
+	end)
 end
 
 -- Prettily prints a file's contents to the console
@@ -25,15 +77,6 @@ function glutil.PrintFile(path, rel)
 	else
 		MsgC(Color(231, 76, 60), "! File doesn't exist!\n")
 	end
-end
-
--- Compiles a function as a string and returns it
-function glutil.CompileStringFunction(code)
-	return CompileString("return "..code, "CompileStringFunction function")()	
-end
--- Opposite of lerp, speed increases as it closes on its target value
-function glutil.AntiLerp(fract, val, target)
-	return math.Clamp(val * (1+fract), 0, target)
 end
 
 return glutil
