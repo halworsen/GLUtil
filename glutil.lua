@@ -41,6 +41,20 @@ function glutil.GetTagLessName(player)
 	return name
 end
 
+-- Concatenates a table's keys, provided they are strings, numbers or booleans
+function glutil.ConcatTableKeys(tbl, joiner)
+	local concatenated = ""
+	local count = table.Count(tbl)
+	local counter = 1
+
+	for k,v in pairs(tbl) do
+		if type(k) == "string" or type(k) == "number" or type(k) == "boolean" then
+			concatenated = concatenated..k..(counter ~= count and joiner or "")
+		end
+		counter = counter + 1
+	end
+end
+
 --[[
 		Everything else
 		Cool stuff, etc.
